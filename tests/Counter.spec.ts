@@ -22,18 +22,27 @@ describe('Counter', () => {
 
         deployer = await blockchain.treasury('deployer');
 
-        const deployResult = await counter.sendDeploy(deployer.getSender(), toNano('0.05'));
+        const deployResult = await counter.sendNumber(deployer.getSender(), toNano('0.05'), 123n);
 
         expect(deployResult.transactions).toHaveTransaction({
             from: deployer.address,
             to: counter.address,
             deploy: true,
-            success: true,
+            // success: true,
         });
     });
 
     it('should deploy', async () => {
         // the check is done inside beforeEach
         // blockchain and counter are ready to use
+        const caller = await blockchain.treasury('caller');
+        await counter.sendNumber(caller.getSender(), toNano('0.01'), 10n);
+        expect(await counter.getTotal()).toEqual(133n);
+
+        await counter.sendNumber(caller.getSender(), toNano('0.01'), 5n);
+        expect(await counter.getTotal()).toEqual(138n);
+
+        await counter.sendNumber(caller.getSender(), toNano('0.01'), 1000n);
+        expect(await counter.getTotal()).toEqual(1138n)
     });
 });

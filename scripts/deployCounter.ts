@@ -4,8 +4,9 @@ import { compile, NetworkProvider } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider) {
     const counter = provider.open(Counter.createFromConfig({}, await compile('Counter')));
+    console.log('Total:', await counter.getTotal())
 
-    await counter.sendDeploy(provider.sender(), toNano('0.05'));
+    await counter.sendNumber(provider.sender(), toNano('0.05'), 123n);
 
     await provider.waitForDeploy(counter.address);
 

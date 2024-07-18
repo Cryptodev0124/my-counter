@@ -3,7 +3,7 @@ import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, 
 export type CounterConfig = {};
 
 export function counterConfigToCell(config: CounterConfig): Cell {
-    return beginCell().endCell();
+    return beginCell().storeUint(0, 64).endCell();
 }
 
 export class Counter implements Contract {
@@ -19,11 +19,16 @@ export class Counter implements Contract {
         return new Counter(contractAddress(workchain, init), init);
     }
 
-    async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
+    async sendNumber(provider: ContractProvider, via: Sender, value: bigint, number: bigint) {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
-            body: beginCell().endCell(),
+            body: beginCell().storeUint(number, 32).endCell(),
         });
+    }
+
+    async getTotal(provider: ContractProvider) {
+        const result = (await provider.get('get_total', [])).stack;
+        return result.readBigNumber();
     }
 }
